@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,4 +19,14 @@ import { TenantModule } from './tenant/tenant.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  static port: number;
+  static hostname: string;
+  static isProduction: boolean;
+
+  constructor(private readonly configService: ConfigService) {
+    AppModule.port = configService.get('APP_PORT');
+    AppModule.hostname = configService.get('APP_URL');
+    AppModule.isProduction = configService.get('NODE_ENV') === 'production';
+  }
+}

@@ -21,4 +21,5 @@ docker run --rm --name node_app -p 3000:3000 --env-file .env --network=host mult
 4. Add DB_HOST=<container-name> to 'docker.env' file i.e. DB_HOST=mssql
 5. Run app with both '.env' files on above network i.e. docker run --name node_app -p 3000:3000 --env-file .env --env-file docker.env --network=cls -d <image-name>
 6. Now we can run app in docker & DB migrations from local i.e. npm run db:tenant:run
+7. Use already created network i.e. docker network connect <network-name> <container-name>
 ```

@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  site-walker:
+    container_name: main_app
+    build:
+      context: .
+      target: production
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    # command: npm run start:dev
+    env_file:
+      - .env
+      - docker.env
+    networks:
+      - site-walker
+    # depends_on:
+    #   - mssql
+
+  redis:
+    container_name: redis
+    image: redis:6
+    networks:
+      - site-walker
+
+networks:
+  site-walker:
+    external: false # false -> create own network, true -> use/connect external network
+    name: site-walker-network

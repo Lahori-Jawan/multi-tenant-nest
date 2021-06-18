@@ -9,6 +9,8 @@ RUN npm install argon2 --build-from-source
 
 COPY . .
 
+RUN npm run build
+
 EXPOSE 3000
 
 CMD ["npm", "run", "start:dev"]
@@ -25,9 +27,12 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app
 
 COPY package*.json ./
-
-RUN npm install --only=production
-RUN npm install argon2 --build-from-source
+RUN apk add --no-cache --virtual .gyp python make g++ \ 
+    && npm install --only=production \
+    npm install argon2 --build-from-source \
+    && apk del .gyp
+# RUN npm install --only=production
+# RUN npm install argon2 --build-from-source
 
 COPY . .
 

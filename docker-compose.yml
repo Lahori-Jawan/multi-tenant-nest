@@ -5,10 +5,10 @@ services:
     container_name: main_app
     build:
       context: .
-      target: production
+      target: ${NODE_ENV}
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - .:/site-walker/app
+      - /site-walker/app/node_modules
     ports:
       - 3000:3000
     # command: npm run start:dev

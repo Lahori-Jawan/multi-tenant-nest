@@ -1,6 +1,6 @@
 FROM node:14.16.0 As development
 
-WORKDIR /app
+WORKDIR /site-walker/app
 
 COPY package*.json ./
 
@@ -24,7 +24,7 @@ FROM node:14.16.0-alpine as production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-WORKDIR /app
+WORKDIR /site-walker/app
 
 COPY package*.json ./
 RUN apk add --no-cache --virtual .gyp python make g++ \ 
@@ -36,6 +36,6 @@ RUN apk add --no-cache --virtual .gyp python make g++ \
 
 COPY . .
 
-COPY --from=development /app/dist ./dist
+COPY --from=development /site-walker/app/dist ./dist
 
 CMD ["node", "dist/main"]

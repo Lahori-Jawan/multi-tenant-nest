@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DEFAULT_TENANT } from '@src/app/common/constants/app';
+import { QueuesService } from '@src/queues/queues.service';
 import { messages } from 'src/app/common/messages';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
@@ -15,6 +16,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private queueService: QueuesService,
   ) {}
 
   async registerUser(createUserDto: CreateUserDto, tenantName: string) {
@@ -25,6 +27,7 @@ export class AuthService {
   }
 
   async loginUser({ email, password }, tenantName: string) {
+    this.queueService.createTenant();
     const user = await this.userService.findByEmail(email);
 
     if (!user) throw new NotFoundException(messages.USER_NOT_FOUND);

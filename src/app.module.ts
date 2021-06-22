@@ -7,6 +7,8 @@ import { ormConfig } from './app/config/ormConfig';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { TenantModule } from './tenant/tenant.module';
+import { QueuesModule } from './queues/queues.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -15,6 +17,14 @@ import { TenantModule } from './tenant/tenant.module';
     TenantModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(ormConfig),
+    QueuesModule,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: configService.get('REDIS_URL'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

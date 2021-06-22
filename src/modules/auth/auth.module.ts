@@ -8,9 +8,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt/jwt.guard';
 import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { QueuesModule } from '@src/queues/queues.module';
 
 @Module({
   imports: [
+    QueuesModule,
     UserModule,
     PassportModule.register({
       defaultStrategy: 'jwt',

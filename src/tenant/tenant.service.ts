@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ServerException } from '@src/app/common/exceptions/server';
+import { QueuesService } from '@src/queues/queues.service';
+import trycatch from '@src/utils/betterCatch';
 import { Connection, Repository } from 'typeorm';
 import { CreateTenantDto } from './dto/create-tenant.dto';
-import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { Tenant } from './entities/tenant.entity';
 
 @Injectable()
@@ -12,12 +14,20 @@ export class TenantService {
   constructor(
     private readonly connection: Connection,
     @InjectRepository(Tenant) private tenantRepository: Repository<Tenant>,
+    private tenantQueue: QueuesService,
   ) {
     this.logger.verbose(`connectionName: ${connection.name}`);
   }
 
   async create(createTenantDto: CreateTenantDto) {
-    return await this.tenantRepository.save(createTenantDto);
+    const promise = this.tenantRepository.save(createTenantDto);
+    const [error, data] = await trycatch(promise);
+
+    if (error || !data) throw new ServerException();
+
+    this.tenantQueue.createTenant(createTenantDto);
+
+    return data;
   }
 
   findAll() {

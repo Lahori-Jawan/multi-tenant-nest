@@ -16,7 +16,6 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-    private queueService: QueuesService,
   ) {}
 
   async registerUser(createUserDto: CreateUserDto, tenantName: string) {
@@ -27,7 +26,6 @@ export class AuthService {
   }
 
   async loginUser({ email, password }, tenantName: string) {
-    this.queueService.createTenant();
     const user = await this.userService.findByEmail(email);
 
     if (!user) throw new NotFoundException(messages.USER_NOT_FOUND);

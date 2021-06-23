@@ -17,9 +17,10 @@ import { ConfigService } from '@nestjs/config';
 import { ormConfig } from 'src/app/config/ormConfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServerException } from 'src/app/common/exceptions/server';
+import { QueuesModule } from '@src/queues/queues.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tenant])],
+  imports: [TypeOrmModule.forFeature([Tenant]), QueuesModule],
   exports: [TenantConnectionProvider],
   controllers: [TenantController],
   providers: [TenantService, TenantConnectionProvider],
@@ -62,23 +63,6 @@ export class TenantModule implements NestModule {
               connected: connection.isConnected,
             });
           } else {
-            // Todo:: move DB Creation/Migration into queue when tenant is created
-            this.logger.verbose(
-              `no connection, creating db for tenant ${tenant.name} (if not exists)`,
-            );
-            const dbPromise = this.connection.query(
-              `IF NOT EXISTS
-              (
-                SELECT name FROM master.dbo.sysdatabases
-                WHERE name = '${tenant.name}'
-              )
-              CREATE DATABASE ${tenant.name}`,
-            );
-
-            const [error, db] = await trycatch(dbPromise);
-
-            if (error) throw new ServerException();
-
             const config = {
               ...ormConfig,
               name: tenant.name,
@@ -86,12 +70,9 @@ export class TenantModule implements NestModule {
               // password: this.configService.get('DB_PASSWORD')
             };
 
-            this.logger.log('db created, now creating connection with config');
-            this.logger.log({ config });
+            this.logger.log(`creating connection with config: ${config}`);
 
             const connection = await createConnection(config);
-            //! comment this line for error 'object "users" already exists'
-            await connection.runMigrations({ transaction: 'none' });
 
             this.logger.log(
               `connection created? ${connection?.isConnected}, connection name -> ${connection.name}`,
